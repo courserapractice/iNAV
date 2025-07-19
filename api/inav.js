@@ -1,4 +1,4 @@
-import { fetch } from 'undici'; // works best on Vercel
+import { fetch } from 'undici';
 
 export default async function handler(req, res) {
   const symbol = req.query.symbol || 'HDFCSML250';
