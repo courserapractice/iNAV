@@ -1,43 +1,46 @@
+// api/inav.js
+
 import { fetch } from 'undici';
 
 export default async function handler(req, res) {
-  const symbol = req.query.symbol || 'HDFCSML250';
+  const { symbol } = req.query;
+
+  if (!symbol) {
+    return res.status(400).json({ error: "Symbol is required" });
+  }
+
+  const url = `https://www.nseindia.com/api/quote-equity?symbol=${symbol}`;
 
   try {
-    const response = await fetch(`https://www.nseindia.com/api/quote-equity?symbol=${symbol}`, {
+    const response = await fetch(url, {
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         'Accept': 'application/json',
         'Referer': 'https://www.nseindia.com/',
         'Accept-Language': 'en-US,en;q=0.9',
-        'Origin': 'https://www.nseindia.com'
+        'Connection': 'keep-alive'
       }
     });
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: 'Failed to fetch NSE data' });
+      return res.status(response.status).json({ error: "Failed to fetch NSE data" });
     }
 
-    const json = await response.json();
+    const data = await response.json();
 
-    const priceInfo = json?.priceInfo || {};
-    const iNAV = parseFloat(priceInfo.iNavValue || 0);
-    const lastPrice = parseFloat(priceInfo.lastPrice || 0);
-    const change = parseFloat(priceInfo.change || 0);
-    const percentChange = parseFloat(priceInfo.pChange || 0);
-    const premiumDiscount = iNAV && lastPrice ? (lastPrice - iNAV).toFixed(2) : null;
+    // Extract only relevant iNAV fields
+    const inav = data?.priceInfo?.iNavValue;
+    const lastPrice = data?.priceInfo?.lastPrice;
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json({
       symbol,
-      iNAV,
+      inav,
       lastPrice,
-      change,
-      percentChange,
-      premiumDiscount
+      premiumOrDiscount: (lastPrice && inav) ? (lastPrice - inav).toFixed(2) : null
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+
+  } catch (error) {
+    console.error("API Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
