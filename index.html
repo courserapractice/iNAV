@@ -1,40 +1,21 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>NSE iNAV Fetcher</title>
-  <style>
-    body { font-family: Arial; padding: 2rem; background: #f5f5f5; }
-    .box { background: #fff; padding: 2rem; border-radius: 10px; max-width: 500px; margin: auto; box-shadow: 0 0 10px #ccc; }
-    #output { margin-top: 1rem; font-size: 1.5rem; }
-  </style>
+  <title>iNAV Fetcher</title>
 </head>
 <body>
-  <div class="box">
-    <h2>Fetch NSE ETF iNAV</h2>
-    <input id="symbol" type="text" placeholder="e.g., HDFCSML250" value="HDFCSML250" />
-    <button onclick="fetchINAV()">Get iNAV</button>
-    <div id="output">iNAV: --</div>
-  </div>
+  <h2>Enter NSE Symbol:</h2>
+  <input type="text" id="symbolInput" placeholder="e.g., HDFCSML250" />
+  <button onclick="fetchINAV()">Fetch iNAV</button>
+  <pre id="output"></pre>
 
   <script>
     async function fetchINAV() {
-      const symbol = document.getElementById("symbol").value.trim();
-      const output = document.getElementById("output");
-      output.innerHTML = "Loading...";
-
-      try {
-        const response = await fetch(`/api/inav?symbol=${symbol}`);
-        const data = await response.json();
-
-        if (data.iNAV) {
-          output.innerHTML = `iNAV: ₹ ${data.iNAV}`;
-        } else {
-          output.innerHTML = `iNAV not available`;
-        }
-      } catch (err) {
-        output.innerHTML = "Error: " + err.message;
-      }
+      const symbol = document.getElementById('symbolInput').value;
+      const res = await fetch('/api/inav?symbol=' + symbol);
+      const data = await res.json();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
     }
   </script>
 </body>
