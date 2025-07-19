@@ -1,4 +1,3 @@
-// api/inav.js
 
 import { fetch } from 'undici';
 
@@ -28,7 +27,6 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // Extract only relevant iNAV fields
     const inav = data?.priceInfo?.iNavValue;
     const lastPrice = data?.priceInfo?.lastPrice;
 
